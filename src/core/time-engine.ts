@@ -38,6 +38,48 @@ export function suggestions(metrics: CategoryMetric[], account: TimeAccount): st
   return result;
 }
 
+export interface TargetStatus {
+  category: TimeCategory;
+  target: number;
+  actual: number;
+  gap: number;
+  progress: number;
+  share: number;
+  roi: number;
+  color: string;
+  icon: string;
+}
+
+export function defaultTargets(): Record<TimeCategory, number> {
+  return { 健康: 8, 学习: 12, 关系: 8, 事业: 15, 娱乐: 3, 休息: 8 };
+}
+
+export function targetTotal(targets: Record<TimeCategory, number>): number {
+  return CATEGORIES.reduce((sum, category) => sum + Math.max(0, Number(targets[category]) || 0), 0);
+}
+
+export function targetStatuses(records: InvestmentRecord[], targets: Record<TimeCategory, number>): TargetStatus[] {
+  return metricsFor(records).map((metric) => {
+    const target = Math.max(0, Number(targets[metric.category]) || 0);
+    const progress = target > 0 ? metric.hours / target : metric.hours > 0 ? 1 : 0;
+    return {
+      category: metric.category,
+      target,
+      actual: metric.hours,
+      gap: Math.round((target - metric.hours) * 10) / 10,
+      progress: Math.round(progress * 100) / 100,
+      share: metric.share,
+      roi: metric.roi,
+      color: metric.color,
+      icon: metric.icon,
+    };
+  });
+}
+
+export function gapRanking(statuses: TargetStatus[]): TargetStatus[] {
+  return [...statuses].sort((a, b) => b.gap - a.gap);
+}
+
 export function record(category: TimeCategory, hours: number, note: string, date = new Date().toISOString()): InvestmentRecord {
   return { id: `time-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, category, hours: Math.max(0.5, Number(hours) || 0.5), note: note.trim() || '未命名投资', date };
 }
@@ -48,5 +90,5 @@ export function sampleSnapshot() {
     ['事业', 16, '产品策略与交付'], ['学习', 10, '阅读与课程'], ['健康', 7, '力量训练与散步'],
     ['关系', 8, '家人和朋友'], ['休息', 9, '睡眠与留白'], ['娱乐', 4, '电影与游戏'],
   ];
-  return { account, records: seed.map(([category, hours, note], index) => record(category, hours, note, new Date(Date.now() - index * 86400000).toISOString())) };
+  return { account, records: seed.map(([category, hours, note], index) => record(category, hours, note, new Date(Date.now() - index * 86400000).toISOString())), targets: defaultTargets() };
 }

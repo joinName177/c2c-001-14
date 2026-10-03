@@ -17,6 +17,7 @@ export interface InvestmentRecord {
 export interface TimeSnapshot {
   account: TimeAccount;
   records: InvestmentRecord[];
+  targets: Record<TimeCategory, number>;
 }
 
 export interface CategoryMetric {
