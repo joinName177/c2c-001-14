@@ -14,9 +14,13 @@ export interface InvestmentRecord {
   date: string;
 }
 
+/** 六类资产各自的每周目标小时 */
+export type WeeklyGoals = Record<TimeCategory, number>;
+
 export interface TimeSnapshot {
   account: TimeAccount;
   records: InvestmentRecord[];
+  goals: WeeklyGoals;
 }
 
 export interface CategoryMetric {
@@ -24,6 +28,20 @@ export interface CategoryMetric {
   hours: number;
   share: number;
   roi: number;
+  color: string;
+  icon: string;
+}
+
+/** 实际投入相对每周目标的达成情况 */
+export interface TargetProgress {
+  category: TimeCategory;
+  actual: number;
+  target: number;
+  /** target - actual：正数表示还差多少小时，负数表示已超额 */
+  gap: number;
+  /** 达成比例 0~1，超额时封顶为 1 */
+  progress: number;
+  achieved: boolean;
   color: string;
   icon: string;
 }
